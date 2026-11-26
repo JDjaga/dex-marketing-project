@@ -80,14 +80,14 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ sessionNotice, onAuthent
         {/* Brand Lockup: Colakin on top, DeX sub-brand nearby below */}
         <div className="flex flex-col items-start gap-2 pb-5 border-b border-slate-100">
           <img
-            src="/assets/aistudio/companylogo1_5f78dfc9.png"
+            src="/assets/images/companylogo1_5f78dfc9.png"
             alt="Colakin"
             className="h-8 sm:h-9 w-auto object-contain"
             referrerPolicy="no-referrer"
           />
           <div className="flex items-center gap-2 pl-0.5">
             <img
-              src="/assets/aistudio/companylogo2_754b2368.png"
+              src="/assets/images/companylogo2_754b2368.png"
               alt="DeX"
               className="h-5 sm:h-6 w-auto object-contain"
               referrerPolicy="no-referrer"

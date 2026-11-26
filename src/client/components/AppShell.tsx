@@ -91,7 +91,7 @@ export const AppShell: React.FC<AppShellProps> = ({
       <div className="px-4 py-4 border-b border-slate-100 flex items-start justify-between gap-2">
         <div className={`flex flex-col ${collapsed && !isMobile ? 'items-center w-full' : 'items-start'} gap-1.5`}>
           <img
-            src="/assets/aistudio/companylogo1_5f78dfc9.png"
+            src="/assets/images/companylogo1_5f78dfc9.png"
             alt="Colakin"
             className={`${collapsed && !isMobile ? 'h-6' : 'h-7'} w-auto object-contain`}
             referrerPolicy="no-referrer"
@@ -99,7 +99,7 @@ export const AppShell: React.FC<AppShellProps> = ({
           {(!collapsed || isMobile) && (
             <div className="flex items-center gap-1.5 pl-0.5">
               <img
-                src="/assets/aistudio/companylogo2_754b2368.png"
+                src="/assets/images/companylogo2_754b2368.png"
                 alt="DeX"
                 className="h-4.5 w-auto object-contain"
                 referrerPolicy="no-referrer"

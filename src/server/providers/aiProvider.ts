@@ -65,7 +65,7 @@ export class GeminiAIProvider implements AIProvider {
       apiKey: process.env.GEMINI_API_KEY,
       httpOptions: {
         headers: {
-          'User-Agent': 'aistudio-build',
+          'User-Agent': 'dex-marketing',
         },
       },
     });
