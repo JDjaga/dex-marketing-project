@@ -1,0 +1,74 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  --color-colakin-navy: #0A2472;
+  --color-dex-blue: #1D63ED;
+  --color-dex-blue-hover: #1752C9;
+  --color-dex-gold: #F5B400;
+  --color-dex-gold-soft: #FEF3C7;
+  --color-canvas-ice: #F4F7FE;
+  --color-canvas-warm: #FDF7E7;
+  --color-ink: #0F172A;
+  --color-ink-muted: #475569;
+  --color-border-hairline: #E2E8F0;
+}
+
+@layer base {
+  html, body {
+    overflow-x: hidden;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background-color: var(--color-canvas-ice);
+    color: var(--color-ink);
+  }
+
+  h1, h2, h3, h4, .font-display {
+    font-family: var(--font-display);
+  }
+
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* Signature Colakin / DeX dot-matrix ambient header canvas */
+.colakin-dot-canvas {
+  background-image:
+    radial-gradient(circle, rgba(29, 99, 237, 0.13) 1.5px, transparent 1.5px),
+    radial-gradient(circle, rgba(245, 180, 0, 0.14) 1.5px, transparent 1.5px),
+    linear-gradient(125deg, #EAF1FF 0%, #F4F7FE 55%, #FDF7E7 100%);
+  background-size: 36px 36px, 36px 36px, 100% 100%;
+  background-position: 0 0, 18px 18px, 0 0;
+}
+
+/* Active tab top-bar gold accent matching Colakin / DeX reference UI */
+.dex-tab-active {
+  position: relative;
+}
+.dex-tab-active::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background-color: #F5B400;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: #FFFFFF !important;
+  }
+}

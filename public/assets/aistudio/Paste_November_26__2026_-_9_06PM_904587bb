@@ -1,0 +1,1746 @@
+MASTER BUILD PROMPT — DEX MARKETING
+Enterprise-Grade AI Marketing Operations SaaS Platform
+1. YOUR ROLE
+Act as a complete senior product engineering team consisting of:
+- Principal Software Architect
+- Senior Full-Stack Engineer
+- Product Manager
+- UI/UX Designer
+- AI/Agent Engineer
+- Database Architect
+- DevOps Engineer
+- QA Engineer
+- Security Engineer
+- Marketing Automation Specialist
+Your task is to design and build DEX Marketing, an industry-quality, multi-tenant SaaS platform that combines email marketing, lead intelligence, social media marketing, AI-assisted content creation, campaign analytics, CRM integrations, and marketing workflow automation.
+Do not treat this as a simple CRUD application, landing page, dashboard mockup, or hackathon project.
+Build a scalable, maintainable, secure, modular application with realistic business workflows, a polished UI, a functional backend, proper database schemas, integration abstractions, error handling, and a production-oriented architecture.
+You must think like an engineer building a real product for agencies and organizations.
+2. PRODUCT CONTEXT
+DEX Marketing is a unified marketing platform for marketing agencies, businesses, and internal marketing teams.
+The platform should eliminate the need for users to switch between multiple tools for:
+- Email marketing
+- Lead research
+- Contact enrichment
+- Audience segmentation
+- Bulk email campaigns
+- Email performance tracking
+- Social media content creation
+- Social media scheduling
+- Social publishing
+- Campaign approvals
+- CRM data access
+- Marketing analytics
+- Team collaboration
+The application must integrate email campaigns and social media marketing into a single unified product.
+Users must be able to manage the complete marketing lifecycle:
+Lead discovery → Enrichment → Audience → Campaign → Content → Review → Approval → Scheduling → Execution → Tracking → Analytics → Optimization.
+The application should be designed to support organizations, agencies, clients, workspaces, and team members.
+3. NON-NEGOTIABLE CONSTRAINTS
+3.1 Cost restrictions
+I can use ONLY free APIs, free tiers, open-source software, and self-hosted services where applicable.
+Do not introduce paid API dependencies.
+Do not assume that I have paid subscriptions to:
+- OpenAI API
+- Anthropic API
+- Claude API
+- Perplexity API
+- Paid data enrichment providers
+- Paid social media APIs
+- Paid email infrastructure
+- Paid analytics platforms
+- Paid automation services
+The architecture must work without paid APIs.
+Free-tier quotas may change. Therefore, all external providers must be configurable, replaceable, and isolated behind provider interfaces.
+Do not hardcode a dependency on a specific API provider.
+The platform must have:
+A functional demo mode.
+A mock integration mode.
+A real integration mode when credentials are available.
+Graceful fallback when a provider is unavailable.
+A configuration page to show integration status.
+Never make the application unusable because an API key is missing.
+3.2 Database
+Use:
+Neon PostgreSQL as the primary database.
+Use a proper ORM and migration system.
+Preferred stack:
+- PostgreSQL
+- Neon
+- Drizzle ORM
+- Drizzle migrations
+Do not use local JSON files as the primary database.
+Do not use browser local storage as the source of truth for application data.
+Local storage may only be used for harmless UI preferences such as sidebar state or theme.
+3.3 MCP-first CRM integration
+CRM integrations must prioritize Model Context Protocol (MCP) connections or dedicated API connector abstractions.
+Do not build CSV import/export as the primary CRM integration mechanism.
+The application should work with external CRM systems while keeping the CRM as the source of truth for its contacts and leads.
+Potential integrations:
+- HubSpot
+- Salesforce
+- Zoho CRM
+- Microsoft Dynamics 365
+- Other compatible CRM MCP servers
+- DEX Sales CRM, if available
+The platform must not unnecessarily duplicate complete CRM contact databases.
+Store external references, synchronization metadata, contact IDs, lead IDs, and the minimum necessary cached data.
+3.4 AI
+Do not train new LLMs.
+Do not build custom foundation models.
+Use a provider-agnostic AI abstraction that supports free-tier providers and local models.
+Possible provider implementations:
+- Gemini API free tier, subject to current quota and eligibility
+- Groq free tier, subject to current quota and eligibility
+- OpenRouter free models, where available
+- Ollama for locally hosted models
+- Other free-compatible providers
+AI features must continue to work in demo mode when no API key is configured.
+The provider must be replaceable without rewriting business logic.
+3.5 UI
+Follow the DEX brand identity and design language from:
+https://dex.colin.ai/
+Analyze the available brand colors, logo, typography, visual hierarchy, and product identity.
+Do not blindly copy an existing website layout.
+Use the DEX brand identity to create a polished SaaS application.
+4. PRODUCT ARCHITECTURE
+Build a modular architecture.
+Recommended stack:
+Frontend
+- Next.js App Router
+- React
+- TypeScript
+- Tailwind CSS
+- shadcn/ui
+- Lucide icons
+- Recharts for charts
+- React Hook Form
+- Zod validation
+Backend
+- Next.js server-side routes/actions or a clearly separated backend service
+- TypeScript
+- REST API or structured server actions
+- Proper service and repository layers
+- Background task processing abstraction
+- Webhook support
+Database
+- Neon PostgreSQL
+- Drizzle ORM
+- Migration-based schema management
+Authentication
+Use a secure, free, maintainable authentication solution.
+Prefer:
+- Better Auth, or another suitable open-source authentication system
+Implement:
+- Email/password authentication
+- Session management
+- Password reset architecture
+- Organization membership
+- Invitations
+- Role-based access control
+- Optional OAuth architecture
+Do not fake authentication in the production implementation.
+Demo mode may provide a clearly identified demo account.
+File storage
+Use a provider abstraction for file storage.
+Possible free-compatible options:
+- Cloudinary free tier
+- Supabase Storage free tier
+- S3-compatible storage if a free option is configured
+- Local development storage
+All uploaded files must be handled through a storage service abstraction.
+Email infrastructure
+Use an abstraction supporting:
+- Resend free tier, if available
+- SMTP
+- Development email preview
+- Mock email provider
+Never hardcode provider credentials.
+Deployment
+The application should be deployable on free-tier infrastructure where possible.
+Prepare for:
+- Vercel or another compatible hosting platform
+- Neon
+- Free-tier storage
+- Free-tier email provider
+- GitHub
+Avoid architecture requiring expensive infrastructure to run.
+5. MULTI-TENANT ARCHITECTURE
+This is a critical requirement.
+The application must support multiple organizations using the same application without exposing data between organizations.
+Hierarchy
+Design the data hierarchy:
+Platform
+→ Organization
+→ Workspace
+→ Team
+→ Users
+→ Campaigns
+→ Contacts
+→ Social accounts
+→ Integrations
+Organizations may have multiple workspaces.
+Workspaces may represent:
+- Departments
+- Client accounts
+- Brands
+- Marketing projects
+Users can belong to multiple organizations.
+Organization management
+Implement:
+- Create organization
+- Organization switcher
+- Invite users
+- Invitation acceptance
+- Remove users
+- Manage roles
+- Organization settings
+- Workspace management
+- Organization branding
+- Organization audit logs
+Roles
+Implement a role-based permissions system.
+Suggested roles:
+Owner
+- Full access
+- Billing/settings
+- Manage organization
+- Manage users
+- Manage integrations
+- Delete organization
+Admin
+- Manage members
+- Manage campaigns
+- Manage integrations
+- Manage workspace settings
+Marketing Manager
+- Create and edit campaigns
+- Manage social content
+- Approve campaigns
+- Schedule content
+- View analytics
+Campaign Editor
+- Create content
+- Edit campaigns
+- Prepare drafts
+- Submit for approval
+Analyst
+- Read-only analytics
+- View campaigns
+- View reports
+- View performance
+Viewer
+- Read-only limited access
+Do not implement permissions solely through hidden UI buttons.
+Permissions must be validated server-side.
+Every tenant-owned database record must have an organization or workspace relationship.
+Prevent cross-tenant data leakage.
+Implement authorization tests proving that users from one organization cannot access another organization's data.
+6. CORE APPLICATION NAVIGATION
+Create a professional dashboard application with the following navigation.
+Main navigation
+Overview
+Campaigns
+Email Marketing
+Social Media
+Audience
+Lead Intelligence
+Content Studio
+Calendar
+Analytics
+CRM Integrations
+Automation
+Approvals
+Brand Kit
+Team
+Settings
+Navigation should be responsive.
+Use a collapsible sidebar on desktop.
+Use an appropriate mobile navigation pattern.
+The interface must feel like a premium B2B SaaS platform.
+7. DASHBOARD
+Create a useful marketing dashboard.
+KPI cards
+Display:
+- Total audience
+- Active campaigns
+- Emails sent
+- Email delivery rate
+- Open rate
+- Click rate
+- Bounce rate
+- Unsubscribe rate
+- Leads generated
+- Social engagement
+- Scheduled posts
+- Campaign conversion rate
+All metrics should be calculated from database data.
+In demo mode, seed realistic data.
+Clearly distinguish demo data from real data.
+Dashboard visualizations
+Include:
+- Email campaign performance over time
+- Social engagement trends
+- Audience growth
+- Campaign performance comparison
+- Channel performance
+- Top-performing campaigns
+- Recent activity
+- Upcoming scheduled content
+Activity feed
+Track:
+- Campaign created
+- Campaign sent
+- Campaign approved
+- Social post scheduled
+- Social post published
+- Contact added
+- Integration connected
+- Team member invited
+Quick actions
+Provide:
+- Create email campaign
+- Create social post
+- Discover leads
+- Create audience segment
+- Generate AI content
+- Connect CRM
+8. EMAIL MARKETING MODULE
+Build a complete email campaign workflow.
+8.1 Campaign types
+Support:
+- Newsletter
+- Promotional campaign
+- Announcement
+- Product launch
+- Event invitation
+- Welcome email
+- Follow-up
+- Cold outreach
+- Re-engagement campaign
+8.2 Campaign creation wizard
+Build a multi-step campaign creation flow.
+Step 1: Campaign details
+- Campaign name
+- Internal description
+- Campaign type
+- Objective
+- Workspace
+- Campaign owner
+Step 2: Audience
+Select:
+- Existing audience
+- Saved segment
+- CRM audience
+- Dynamic filter
+- Manual selection
+Show:
+- Estimated recipient count
+- Suppressed contacts
+- Invalid contacts
+- Unsubscribed contacts
+- Duplicate contacts
+Step 3: Email content
+Create a professional email editor.
+Support:
+- Subject line
+- Preview text
+- Sender name
+- Sender email
+- Reply-to
+- Email body
+- HTML email
+- Plain text fallback
+- Rich-text editing
+- Reusable templates
+Allow:
+- AI subject suggestions
+- AI content generation
+- AI rewrite
+- Tone selection
+- Personalization variables
+- Preview mode
+- Desktop preview
+- Mobile preview
+Personalization variables
+Support placeholders such as:
+- {{first_name}}
+- {{last_name}}
+- {{company}}
+- {{job_title}}
+- {{location}}
+- {{custom_field}}
+Implement safe substitution.
+If a value is unavailable, use a fallback.
+Never expose raw template syntax in the sent email when variables are missing.
+Step 4: Tracking
+Support configurable tracking:
+- Email delivery
+- Opens
+- Clicks
+- Bounces
+- Unsubscribes
+- Spam complaints, when provider data is available
+Explain tracking limitations.
+Open tracking should be based on a tracking pixel and must account for privacy-related inaccuracies.
+Click tracking should use redirect tracking with secure URL validation.
+Step 5: Review
+Display:
+- Campaign summary
+- Recipient count
+- Email preview
+- Sending configuration
+- Compliance checklist
+- Spam-risk warnings
+- Suppression list checks
+Step 6: Schedule or send
+Allow:
+- Save draft
+- Schedule
+- Send test email
+- Send campaign
+For real sending:
+- Respect provider rate limits
+- Queue messages
+- Retry transient failures
+- Record delivery attempts
+- Stop sending when a campaign is paused
+- Support cancellation where possible
+Do not pretend an email has been sent if the provider is in mock mode.
+9. EMAIL CAMPAIGN ANALYTICS
+Each campaign must have a dedicated analytics page.
+Metrics:
+- Recipients
+- Sent
+- Delivered
+- Failed
+- Bounced
+- Opens
+- Unique opens
+- Clicks
+- Unique clicks
+- Unsubscribes
+- Complaints
+- Conversion events
+Calculate:
+Delivery rate = Delivered / Sent
+Open rate = Unique opens / Delivered
+Click rate = Unique clicks / Delivered
+Click-to-open rate = Unique clicks / Unique opens
+Bounce rate = Bounced / Sent
+Unsubscribe rate = Unsubscribes / Delivered
+Use correct handling for zero denominators.
+Analytics charts
+- Performance over time
+- Hourly engagement
+- Link click performance
+- Recipient engagement
+- Bounce breakdown
+- Device breakdown when available
+- Geographic performance when available
+Campaign comparisons
+Compare multiple campaigns.
+Allow filtering by:
+- Date
+- Campaign type
+- Workspace
+- Channel
+- Audience segment
+10. AUDIENCE MANAGEMENT
+Create a centralized audience module.
+However, external CRMs remain the source of truth when connected.
+The platform must not force users to import CSV files.
+Audience sources
+- External CRM
+- Connected MCP server
+- Native DEX contacts, if DEX CRM is available
+- User-created contacts
+- Form submissions
+- Campaign engagement
+- Lead discovery
+Contact profile
+Each contact should support:
+- Contact ID
+- External CRM ID
+- First name
+- Last name
+- Email
+- Phone
+- Company
+- Job title
+- Industry
+- Location
+- State
+- Country
+- Gender, only where legally collected and relevant
+- Tags
+- Custom attributes
+- Source
+- Owner
+- Lifecycle stage
+- Consent status
+- Subscription status
+- Last engagement
+- Engagement score
+Do not collect unnecessary sensitive personal information.
+Contact detail page
+Display:
+- Profile information
+- Connected CRM record
+- Campaign history
+- Email engagement
+- Social engagement where applicable
+- Notes
+- Tags
+- Activity history
+- Consent history
+- External identifiers
+Allow editing only when the connected CRM permits it.
+Clearly distinguish:
+- Locally cached fields
+- CRM-owned fields
+- Locally owned fields
+Audience segmentation
+Create a visual segment builder.
+Support AND/OR conditions.
+Filter by:
+- Location
+- Country
+- State
+- Industry
+- Company
+- Job title
+- Tags
+- Source
+- Lifecycle stage
+- Campaign engagement
+- Email opens
+- Clicks
+- Last engagement
+- Consent status
+- Custom fields
+Provide:
+- Dynamic segments
+- Saved segments
+- Segment preview
+- Recipient count
+- Refresh functionality
+Do not load entire CRM databases unnecessarily.
+Query the CRM through connector abstractions where possible.
+11. LEAD INTELLIGENCE AND ENRICHMENT
+Build an AI-assisted lead discovery workspace.
+Lead discovery
+Allow users to describe their target audience in natural language.
+Examples:
+- Find SaaS companies in India with 20–100 employees.
+- Find marketing managers at healthcare companies in Chennai.
+- Find founders of early-stage technology companies.
+- Find companies that may need digital marketing services.
+Convert user intent into structured search criteria.
+Show:
+- Target industry
+- Geography
+- Company size
+- Job titles
+- Keywords
+- Target profile
+Lead research workflow
+Lead discovery should follow:
+Target definition
+→ Search provider selection
+→ Search
+→ Candidate results
+→ Validation
+→ Enrichment
+→ Deduplication
+→ CRM matching
+→ Review
+→ Save to campaign/audience
+Search provider abstraction
+Do not assume that a single free search API is permanently available.
+Build interfaces for:
+- Search engine providers
+- Public company websites
+- Open web search
+- User-provided URLs
+- Connected CRM
+- Approved enrichment providers
+Use only permitted public data and provider APIs.
+Do not bypass access controls, paywalls, authentication, rate limits, CAPTCHA, or platform restrictions.
+Enrichment
+Where permitted, enrich with:
+- Company name
+- Company website
+- Industry
+- Company description
+- Public business location
+- Public professional information
+- Public business contact details
+- Company size, where available
+- Source URLs
+- Data confidence
+- Last verified date
+Every enrichment result must include provenance.
+Display:
+- Source
+- Confidence
+- Last checked
+- Enrichment status
+Do not fabricate lead data.
+AI-generated guesses must never be represented as verified facts.
+Lead scoring
+Create configurable lead scoring.
+Possible scoring inputs:
+- ICP match
+- Industry match
+- Location match
+- Company size
+- Engagement
+- CRM lifecycle stage
+- Data quality
+Display:
+- Score
+- Score explanation
+- Confidence
+- Recommended next action
+Scoring must be explainable.
+12. CRM INTEGRATIONS VIA MCP
+This is a major architectural requirement.
+Integration framework
+Build a connector framework.
+Each integration should support:
+- Connector metadata
+- Authentication
+- Credential management
+- Connection health
+- Tool discovery
+- Permission scopes
+- Test connection
+- Sync status
+- Logs
+- Error reporting
+- Reconnection
+- Disconnect
+MCP architecture
+Implement an MCP-compatible connection architecture where appropriate.
+The application should have an integration layer that communicates with approved MCP servers or equivalent provider adapters.
+Do not tightly couple the frontend to MCP implementation details.
+Build a CRM service abstraction:
+- Search contacts
+- Search companies
+- Retrieve contact
+- Retrieve company
+- Retrieve leads
+- Retrieve opportunities
+- Create contact, if authorized
+- Update contact, if authorized
+- Add activity, if authorized
+- Fetch CRM metadata
+- Fetch custom fields
+Use the available tool capabilities dynamically.
+Do not assume every MCP server provides the same tools.
+Supported CRM architecture
+Prepare adapters for:
+- HubSpot
+- Salesforce
+- Zoho
+- Dynamics 365
+- Other MCP-compatible CRM systems
+Do not falsely mark an integration as fully operational if credentials or provider permissions are missing.
+Integration UI
+Create an integrations page with:
+- Available integrations
+- Connected integrations
+- Connection status
+- Last sync
+- Available capabilities
+- Permission scopes
+- Configure
+- Test
+- Disconnect
+CRM as source of truth
+The external CRM should remain the source of truth.
+Use external IDs.
+Avoid unnecessary duplication.
+Cache data only when necessary and with clear expiration/synchronization rules.
+Do not provide CSV import/export as the main CRM integration workflow.
+13. SOCIAL MEDIA MANAGEMENT
+Build a comprehensive social media marketing module.
+Supported platform architecture
+Design adapters for:
+- Facebook
+- Instagram
+- LinkedIn
+- YouTube
+- X
+- Other platforms through future connectors
+Actual capabilities must depend on official APIs, platform permissions, account type, and approved access.
+Do not claim that every platform supports posting, analytics, or scheduling.
+Social account connection
+Users should be able to:
+- Connect accounts
+- View account status
+- See token expiration
+- Reauthorize
+- Disconnect
+- View account permissions
+- Select accounts for publishing
+Implement OAuth architecture where officially supported.
+Never ask users to enter social media passwords into the application.
+Do not automate login using passwords or bypass two-factor authentication.
+Do not scrape authenticated social media pages.
+Do not use unauthorized computer automation to publish.
+Social content creation
+Create a content composer.
+Support:
+- Text
+- Image
+- Video
+- Carousel
+- Multi-platform content
+- Platform-specific variations
+- Hashtags
+- Mentions where permitted
+- Link previews
+Content generation
+AI should generate platform-specific content.
+For example, one idea may produce:
+- LinkedIn professional post
+- Instagram caption
+- Facebook post
+- X short post
+- YouTube description
+Allow users to adjust:
+- Tone
+- Length
+- Audience
+- Objective
+- CTA
+- Brand voice
+The content must be editable.
+AI-generated content must not automatically publish without approval unless the organization explicitly configures that workflow.
+Media generation
+Support media upload.
+Build a media library.
+Organize by:
+- Campaign
+- Brand
+- Folder
+- Type
+- Tags
+AI image generation must be optional and use only an available free or local provider.
+If image generation is unavailable, allow users to upload assets.
+Do not make the platform dependent on paid image-generation APIs.
+Social post lifecycle
+Draft
+→ AI-assisted creation
+→ Review
+→ Approval
+→ Scheduling
+→ Publishing
+→ Published
+→ Analytics
+Also support:
+- Rejected
+- Failed
+- Cancelled
+- Needs revision
+14. CONTENT CALENDAR
+Create a unified marketing calendar.
+Include:
+- Email campaigns
+- Social posts
+- Campaign deadlines
+- Approval deadlines
+- Scheduled content
+- Published content
+Views:
+- Month
+- Week
+- Day
+- List
+Filters:
+- Platform
+- Campaign
+- Workspace
+- Status
+- Owner
+Allow users to:
+- Drag and drop posts where technically feasible
+- Reschedule
+- Open content details
+- View status
+- Create content from a calendar date
+Display timezone information.
+Store timestamps in UTC and display according to the user's configured timezone.
+15. APPROVAL WORKFLOW
+Build a proper marketing approval system.
+Workflow
+Draft
+→ Submitted for review
+→ Reviewer assigned
+→ Approved / Rejected
+→ Scheduled
+→ Published
+Approval capabilities
+- Assign reviewer
+- Add comments
+- Request changes
+- Approve
+- Reject
+- Revision history
+- Approval timestamp
+- Reviewer identity
+- Activity log
+Permissions
+Campaign editors must not automatically publish content when approval is required.
+Marketing managers or authorized approvers can approve.
+Administrators can configure workflow rules.
+Approval dashboard
+Show:
+- Pending approvals
+- Overdue approvals
+- Approved content
+- Rejected content
+- Upcoming publishing schedule
+16. BRAND KIT
+Create a brand configuration module.
+Support:
+- Brand name
+- Logo
+- Primary colors
+- Secondary colors
+- Font preferences
+- Brand voice
+- Tone
+- Audience
+- Messaging guidelines
+- Approved CTAs
+- Prohibited phrases
+- Brand descriptions
+AI generation should use the configured brand context.
+Allow multiple brands per organization/workspace where appropriate.
+17. AI MARKETING ASSISTANT
+Create a contextual AI assistant.
+The assistant should be integrated into:
+- Email creation
+- Social content creation
+- Lead discovery
+- Audience segmentation
+- Campaign analysis
+- Reporting
+- Brand management
+Capabilities
+- Generate email campaigns
+- Rewrite emails
+- Improve subject lines
+- Create social content
+- Generate content variations
+- Suggest hashtags
+- Generate CTAs
+- Create campaign ideas
+- Explain campaign performance
+- Recommend audience segments
+- Analyze campaign results
+- Summarize lead research
+- Suggest next steps
+AI provider architecture
+Create a common interface.
+Example:
+AIProvider
+→ generateText()
+→ generateStructuredOutput()
+→ summarize()
+→ classify()
+→ analyze()
+Provider implementations must be isolated.
+Implement:
+- Provider configuration
+- API key validation
+- Usage limits
+- Timeout
+- Retry
+- Rate-limit handling
+- Error messages
+- Fallback provider
+- Local model option
+Do not expose API keys to the browser.
+Do not store API keys in plaintext database fields.
+Use environment variables or secure encrypted credentials.
+AI context
+AI should use only authorized context:
+- Current organization
+- Current workspace
+- Brand guidelines
+- Campaign information
+- Relevant audience information
+- Connected CRM information allowed by permissions
+Do not allow AI to access data across tenants.
+Human approval
+AI must not autonomously:
+- Send mass emails
+- Publish social posts
+- Delete contacts
+- Change CRM records
+- Modify permissions
+without explicit user authorization and the appropriate workflow.
+18. AUTOMATION ENGINE
+Build a simple but extensible marketing automation system.
+Trigger types
+- Contact created
+- Segment membership changed
+- Campaign sent
+- Email opened
+- Link clicked
+- Contact unsubscribed
+- Social post published
+- Approval completed
+- Scheduled time reached
+Action types
+- Add tag
+- Update lifecycle stage
+- Create task
+- Notify user
+- Add contact to campaign
+- Send email, subject to consent and safeguards
+- Trigger AI workflow
+- Sync with CRM
+- Create follow-up recommendation
+Automation builder
+Create a visual workflow builder with:
+Trigger
+→ Conditions
+→ Actions
+Support:
+- Start node
+- Condition node
+- Action node
+- Delay node
+- Branch node
+For initial implementation, support a limited but fully functional set of nodes.
+Do not create a visual builder with nodes that do nothing.
+Every supported node must execute correctly.
+19. COMPLIANCE AND UNSUBSCRIBE CENTER
+This is a mandatory component.
+Build a centralized suppression and compliance system.
+Suppression categories
+- Unsubscribed
+- Hard bounce
+- Spam complaint
+- Invalid email
+- Manually suppressed
+- Organization-level suppression
+Unsubscribe center
+Allow users to:
+- View suppressed contacts
+- Search
+- View suppression reason
+- View date
+- View source campaign
+- View consent history
+Provide a safe unsubscribe mechanism for recipients.
+Unsubscribed contacts must never be included in campaigns unless legally and explicitly re-consented through a compliant process.
+Campaign validation
+Before sending, validate:
+- Consent
+- Suppression
+- Invalid addresses
+- Duplicates
+- Missing sender identity
+- Required unsubscribe mechanism
+- Campaign content
+- Recipient count
+Prevent sending if compliance checks fail.
+Compliance
+Design for applicable privacy and email marketing requirements, including GDPR principles and relevant Indian privacy laws where applicable.
+Provide:
+- Consent records
+- Consent timestamps
+- Consent sources
+- Privacy configuration
+- Data retention controls
+- Data deletion workflows
+- Audit logs
+This platform is not a legal compliance guarantee.
+20. SECURITY
+Implement industry-standard security practices.
+Mandatory
+- Authentication
+- Server-side authorization
+- Tenant isolation
+- Input validation
+- Zod validation
+- Rate limiting
+- CSRF protection where applicable
+- Secure cookies
+- Password security
+- Secrets management
+- SQL injection protection
+- XSS protection
+- Safe file uploads
+- URL validation
+- SSRF protection
+- Audit logging
+- API request validation
+- Webhook signature validation where supported
+Credentials
+Never:
+- Hardcode credentials
+- Commit API keys
+- Expose API keys to client-side code
+- Store user passwords for social media accounts
+- Log secrets
+- Display secret values after saving
+Integrations
+Treat external data as untrusted.
+Protect against:
+- Malicious MCP responses
+- Prompt injection
+- Unsafe URLs
+- Tool misuse
+- Unauthorized actions
+- Cross-tenant data access
+AI must not execute external tool actions without permission checks.
+21. DATABASE DESIGN
+Create a proper relational schema.
+Suggested entities:
+Authentication
+- users
+- sessions
+- accounts
+- verification_tokens
+Tenant
+- organizations
+- organization_members
+- invitations
+- workspaces
+- workspace_members
+- roles
+- permissions
+Marketing
+- campaigns
+- campaign_recipients
+- campaign_events
+- email_templates
+- email_sends
+- email_links
+- segments
+- segment_conditions
+- contacts
+- contact_tags
+- tags
+- suppression_records
+- consent_records
+CRM
+- integrations
+- integration_credentials
+- integration_tools
+- external_contacts
+- external_records
+- sync_logs
+Social
+- social_accounts
+- social_posts
+- social_post_media
+- social_post_platforms
+- social_post_events
+- publishing_jobs
+Content
+- content_assets
+- content_folders
+- brand_kits
+- content_templates
+Approval
+- approvals
+- approval_comments
+- approval_history
+Automation
+- automation_workflows
+- automation_nodes
+- automation_edges
+- automation_runs
+- automation_run_steps
+Analytics
+- analytics_events
+- report_snapshots
+System
+- notifications
+- activity_logs
+- audit_logs
+- background_jobs
+- webhooks
+Use:
+- UUID identifiers
+- Foreign keys
+- Appropriate indexes
+- Unique constraints
+- Transactions
+- Timestamps
+- Soft deletion where justified
+- Organization-level scoping
+Use JSONB only when the data is genuinely flexible.
+Do not place the entire application data model into a few generic JSON columns.
+Create proper migrations.
+22. BACKGROUND JOBS
+Email sending, enrichment, analytics processing, publishing, and automation must not rely on long-running HTTP requests.
+Build a background job abstraction.
+Possible free-compatible implementation:
+- PostgreSQL-backed job queue
+- Worker process
+- Scheduled job runner
+- Retry system
+Jobs should support:
+- Pending
+- Processing
+- Completed
+- Failed
+- Retry
+- Cancelled
+Each job should have:
+- Job type
+- Payload
+- Organization ID
+- Attempt count
+- Scheduled time
+- Execution time
+- Error details
+Implement:
+- Exponential backoff
+- Retry limits
+- Idempotency
+- Dead-letter handling
+- Job monitoring
+Avoid duplicate email sends or duplicate social publishing.
+23. ANALYTICS AND REPORTING
+Create a unified analytics module.
+Email analytics
+- Sent
+- Delivered
+- Opens
+- Clicks
+- Bounce
+- Unsubscribe
+- Conversion
+Social analytics
+Where provider APIs allow:
+- Published posts
+- Reach
+- Impressions
+- Likes
+- Comments
+- Shares
+- Engagement rate
+- Clicks
+- Followers
+Unified analytics
+- Campaign performance
+- Channel comparison
+- Audience growth
+- Lead conversion
+- Engagement trends
+- ROI framework
+Do not fabricate metrics.
+When data is unavailable:
+Display:
+"Not available from this connected provider."
+Do not convert missing data into zero if zero is not known.
+Reports
+Support:
+- Date range
+- Workspace
+- Campaign
+- Channel
+- Export-ready report views
+Build printable report pages.
+24. DESIGN SYSTEM AND UI QUALITY
+The UI must be polished.
+Avoid:
+- Generic AI-generated dashboard appearance
+- Excessive gradients
+- Random glassmorphism
+- Giant empty cards
+- Inconsistent spacing
+- Oversized buttons
+- Unnecessary animations
+- Fake data that looks real
+- Placeholder buttons
+- Broken navigation
+Use a consistent design system.
+Design principles
+- Professional B2B SaaS
+- Clean and modern
+- High information density without clutter
+- Strong typography
+- Consistent spacing
+- Clear hierarchy
+- Accessible contrast
+- Responsive layouts
+- Thoughtful empty states
+- Helpful loading states
+- Error states
+- Success feedback
+- Confirmation dialogs
+Use DEX branding.
+Components
+Build reusable components:
+- App sidebar
+- Header
+- Breadcrumbs
+- Workspace selector
+- Organization selector
+- KPI cards
+- Tables
+- Data filters
+- Search
+- Dialogs
+- Drawers
+- Forms
+- Charts
+- Status badges
+- Campaign cards
+- Content cards
+- Calendar events
+- Approval cards
+- Empty states
+- Error boundaries
+Use realistic demo data.
+The UI should resemble a product that is ready to be demonstrated to a client or stakeholder.
+25. REQUIRED PAGES
+Implement actual pages with functional navigation.
+Authentication
+- Sign in
+- Sign up
+- Forgot password
+- Reset password
+Dashboard
+- Overview
+- Activity
+- Performance
+Campaigns
+- Campaign list
+- Campaign detail
+- Campaign creation wizard
+- Campaign analytics
+Email marketing
+- Email templates
+- Email editor
+- Email preview
+- Campaign sending
+- Audience selection
+Audience
+- Contact list
+- Contact profile
+- Segments
+- Segment builder
+- Suppression center
+Lead intelligence
+- Search workspace
+- Discovery results
+- Enrichment details
+- Lead scoring
+- Saved leads
+Social media
+- Connected accounts
+- Content composer
+- Post editor
+- Social post details
+- Publishing queue
+- Analytics
+Content studio
+- AI content generation
+- Templates
+- Media library
+- Brand kit
+Calendar
+- Month
+- Week
+- Day
+- List
+Approvals
+- Pending
+- Approved
+- Rejected
+- Review history
+CRM integrations
+- Available connectors
+- Connected CRM
+- MCP configuration
+- Connection diagnostics
+Automation
+- Workflow list
+- Workflow editor
+- Workflow execution history
+Analytics
+- Overview
+- Campaign analytics
+- Email analytics
+- Social analytics
+- Audience analytics
+- Reports
+Team
+- Members
+- Invitations
+- Roles
+Settings
+- Organization
+- Workspace
+- Brand
+- Integrations
+- AI providers
+- Email providers
+- Notifications
+- Privacy
+- Security
+26. API AND SERVICE ARCHITECTURE
+Keep business logic out of UI components.
+Use a layered architecture.
+Example:
+Frontend
+→ API/Server Actions
+→ Validation
+→ Authorization
+→ Business Services
+→ Repositories
+→ Database
+External integrations:
+Business Services
+→ Provider Interfaces
+→ Connector Adapters
+→ External APIs / MCP
+Background processing:
+Business Services
+→ Job Queue
+→ Worker
+→ Integration Adapter
+→ Event Recording
+Create reusable service modules for:
+- CampaignService
+- AudienceService
+- ContactService
+- SegmentService
+- LeadDiscoveryService
+- EnrichmentService
+- EmailService
+- SocialPublishingService
+- AnalyticsService
+- CRMService
+- ApprovalService
+- AutomationService
+- AIService
+- NotificationService
+- ComplianceService
+Use a consistent error-handling structure.
+Do not duplicate business logic across pages.
+27. DEMO MODE
+A fully functional demo mode is mandatory.
+Demo mode should allow stakeholders to explore the application without external API keys.
+Seed:
+- One demo organization
+- Multiple users with different roles
+- Multiple workspaces
+- Email campaigns
+- Contacts
+- Audience segments
+- Social accounts
+- Social posts
+- Content calendar
+- Approval workflows
+- CRM connections
+- Analytics
+- Automation workflows
+- Notifications
+Provide simulated integrations.
+However, the interface must clearly display:
+- Demo mode
+- Simulated results
+- Simulated publishing
+- Simulated email delivery
+Do not misrepresent simulated events as real external actions.
+Implement realistic workflows in demo mode.
+A stakeholder should be able to:
+Create an email campaign.
+Select an audience.
+Generate email content.
+Preview.
+Submit for approval.
+Approve.
+Schedule.
+Simulate sending.
+View analytics.
+They should also be able to:
+Create a social post.
+Select platforms.
+Generate content.
+Add media.
+Submit for approval.
+Schedule.
+Simulate publishing.
+View analytics.
+28. TESTING
+Do not consider the application complete without testing.
+Unit tests
+Test:
+- Business logic
+- Segmentation
+- Permission checks
+- Analytics calculations
+- Campaign validation
+- Consent checks
+- Suppression
+- AI provider abstraction
+- CRM adapter behavior
+Integration tests
+Test:
+- Database operations
+- Authentication
+- Tenant isolation
+- Campaign creation
+- Job queue
+- Webhook processing
+- API validation
+End-to-end tests
+Test critical flows:
+Email
+Login
+→ Create campaign
+→ Select audience
+→ Create content
+→ Preview
+→ Submit
+→ Approve
+→ Schedule
+→ Execute in demo mode
+→ Analytics
+Social
+Login
+→ Create post
+→ Select platform
+→ Generate content
+→ Upload asset
+→ Submit approval
+→ Approve
+→ Schedule
+→ Simulate publishing
+CRM
+Connect demo CRM
+→ Search contacts
+→ Retrieve lead
+→ View external record
+→ Create campaign from CRM audience
+Permissions
+Verify:
+- Analyst cannot edit campaigns
+- Editor cannot publish without approval
+- Viewer cannot modify settings
+- Tenant A cannot access Tenant B
+29. OBSERVABILITY
+Implement:
+- Structured logging
+- Error tracking abstraction
+- Job monitoring
+- Integration logs
+- API request IDs
+- Audit trails
+- Health checks
+Never log:
+- Passwords
+- API keys
+- OAuth access tokens
+- Sensitive personal data
+Create an admin diagnostics page showing:
+- Database health
+- Queue status
+- Email provider status
+- AI provider status
+- CRM status
+- Social integrations
+- Storage status
+30. PROJECT EXECUTION PROCESS
+Do not attempt to generate the entire application in one uncontrolled step.
+Work through the following phases.
+PHASE 1 — DISCOVERY AND PLANNING
+Analyze the complete requirements.
+Produce:
+- Product specification
+- Architecture
+- Feature breakdown
+- User journeys
+- Database schema
+- Integration strategy
+- Security model
+- API design
+- Technical decisions
+Identify limitations of free APIs.
+Identify features that require OAuth approvals or external provider permissions.
+Do not pretend unavailable integrations are immediately implementable.
+PHASE 2 — DESIGN SYSTEM
+Create:
+- Brand configuration
+- Colors
+- Typography
+- Spacing
+- Component system
+- Sidebar
+- Header
+- Dashboard
+- Responsive behavior
+Implement the shell before feature pages.
+PHASE 3 — DATABASE AND AUTHENTICATION
+Implement:
+- Neon connection
+- Drizzle schema
+- Migrations
+- Authentication
+- Organizations
+- Workspaces
+- Memberships
+- Roles
+- Permissions
+Test tenant isolation before moving forward.
+PHASE 4 — CORE APPLICATION
+Implement:
+- Dashboard
+- Team
+- Settings
+- Audience
+- Campaigns
+- Contact management
+PHASE 5 — EMAIL CAMPAIGNS
+Implement:
+- Campaign creation
+- Email editor
+- Templates
+- Audience selection
+- Preview
+- Sending abstraction
+- Scheduling
+- Tracking
+- Analytics
+- Compliance
+PHASE 6 — SOCIAL MEDIA
+Implement:
+- Social account architecture
+- Content composer
+- Media library
+- Calendar
+- Approval
+- Scheduling
+- Publishing adapter architecture
+- Analytics
+PHASE 7 — AI AND LEAD INTELLIGENCE
+Implement:
+- AI provider abstraction
+- Content generation
+- Lead discovery
+- Enrichment
+- Lead scoring
+- Campaign recommendations
+PHASE 8 — CRM/MCP
+Implement:
+- Connector architecture
+- MCP client integration
+- CRM tool discovery
+- HubSpot adapter where feasible
+- Mock CRM
+- Connection management
+- CRM search
+- External record references
+PHASE 9 — AUTOMATION
+Implement:
+- Trigger engine
+- Workflow model
+- Conditions
+- Actions
+- Execution history
+- Retry system
+PHASE 10 — ANALYTICS
+Implement:
+- Campaign analytics
+- Email analytics
+- Social analytics
+- Audience analytics
+- Unified dashboard
+- Reports
+PHASE 11 — QA AND HARDENING
+Run:
+- Type checking
+- Lint
+- Unit tests
+- Integration tests
+- End-to-end tests
+- Security checks
+- Responsive tests
+Fix all critical issues.
+PHASE 12 — DOCUMENTATION AND DELIVERY
+Produce:
+- README
+- Architecture document
+- Environment configuration
+- Database setup
+- Migration instructions
+- Demo account
+- API documentation
+- Integration guide
+- Deployment guide
+- Known limitations
+31. IMPLEMENTATION RULES
+Follow these rules throughout development.
+Inspect the existing project before modifying it.
+Preserve working features.
+Do not overwrite existing configuration unnecessarily.
+Do not create multiple competing architectures.
+Keep TypeScript strict.
+Avoid unnecessary `any`.
+Use reusable components.
+Use modular services.
+Keep database migrations version-controlled.
+Use environment variables for secrets.
+Never commit secrets.
+Never expose server credentials to the browser.
+Validate all user inputs.
+Handle loading states.
+Handle empty states.
+Handle errors.
+Make every button functional.
+Do not create fake interactive elements.
+Do not use placeholder pages for required features.
+Do not claim external integration functionality without actually implementing or clearly simulating it.
+Do not fabricate analytics.
+Do not fabricate lead information.
+Do not bypass API limitations.
+Do not bypass social platform policies.
+Do not bypass authentication or security.
+Do not make paid APIs mandatory.
+Make demo mode comprehensive.
+Ensure every database query is tenant-scoped.
+Test authorization on the backend.
+Keep the application deployable.
+32. REQUIRED ENVIRONMENT VARIABLES
+Create a documented `.env.example`.
+Include only relevant variables, such as:
+DATABASE_URL=
+AUTH_SECRET=
+APP_URL=
+AI_PROVIDER=
+GEMINI_API_KEY=
+GROQ_API_KEY=
+OPENROUTER_API_KEY=
+OLLAMA_BASE_URL=
+EMAIL_PROVIDER=
+RESEND_API_KEY=
+SMTP_HOST=
+SMTP_PORT=
+SMTP_USER=
+SMTP_PASSWORD=
+STORAGE_PROVIDER=
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+CRM configuration should use secure integration configuration rather than hardcoded values.
+Social provider credentials must be configurable.
+Do not require every variable to be populated.
+The application should boot in demo mode with minimal configuration.
+33. DEFINITION OF DONE
+The product is not complete merely because the dashboard renders.
+The project is complete only when the following criteria are met.
+Architecture
+- Modular architecture exists.
+- Neon PostgreSQL is connected.
+- Database migrations work.
+- Authentication works.
+- Multi-tenant architecture works.
+- Role-based permissions work.
+- Tenant isolation is tested.
+Email
+- Create campaigns.
+- Select audiences.
+- Create and edit content.
+- Preview email.
+- Save drafts.
+- Submit for approval.
+- Schedule.
+- Execute through demo or configured provider.
+- Track events.
+- View analytics.
+- Unsubscribe functionality works.
+Audience
+- Contact list works.
+- Contact details work.
+- Segmentation works.
+- Saved segments work.
+- CRM references work.
+- Suppression works.
+Social
+- Create content.
+- Edit content.
+- Upload media.
+- Create platform variations.
+- Approval workflow works.
+- Calendar works.
+- Scheduling works.
+- Demo publishing works.
+- Analytics are accurately represented.
+AI
+- AI provider abstraction works.
+- Demo fallback works.
+- Content generation works when configured.
+- Provider errors are handled.
+- API keys remain secure.
+CRM
+- Connector architecture exists.
+- Mock CRM works.
+- External IDs are supported.
+- CRM search works through the adapter.
+- Integration health is visible.
+- MCP compatibility architecture is documented.
+UI
+- All navigation works.
+- Responsive layout works.
+- Loading states exist.
+- Empty states exist.
+- Errors are handled.
+- Forms are validated.
+- No dead buttons.
+- No broken pages.
+Quality
+- TypeScript passes.
+- Lint passes.
+- Tests pass.
+- Build succeeds.
+- README is complete.
+- Environment example exists.
+- Deployment instructions exist.
+34. FINAL INSTRUCTIONS TO THE AGENT
+Start by inspecting the current repository, existing code, available tools, project configuration, and brand assets.
+Do not immediately start writing random components.
+First create a technical implementation plan and identify the project's current state.
+Then build the application in a controlled, incremental manner.
+Maintain a `PROJECT_STATUS.md` file documenting:
+- Completed features
+- Current phase
+- Remaining tasks
+- Known limitations
+- API dependencies
+- Decisions made
+- Test results
+Maintain an `ARCHITECTURE.md` document.
+Maintain a `README.md`.
+Maintain database migrations.
+Do not stop after producing a visual dashboard.
+Build functional workflows and connect the frontend to the backend.
+Where real integrations require unavailable API credentials, implement a working adapter architecture and a transparent simulation mode.
+When a feature cannot be implemented because of an external API restriction, clearly document:
+Why the feature is restricted.
+What permissions are required.
+What the free alternative is.
+What is currently functional.
+What remains to be implemented.
+Prioritize a reliable, cohesive product over a large number of unfinished features.
+The final result must be a polished, professional, industry-quality DEX Marketing SaaS application that can be demonstrated to technical leadership, product stakeholders, and potential customers.
+Begin with repository inspection and Phase 1 planning. Then proceed phase-by-phase, implementing, testing, and documenting each phase before moving to the next.
+
+
+companylogo1 is the real company, companylogo2 is subrand it wnat to be placed nearby below the companylogo1. then craete the whole website with the colour templete.png colour platelete
+
+
+before building that tell me could you able to finish the whole project or else you will be ran out of credits inbetwwen 

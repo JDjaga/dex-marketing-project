@@ -1,0 +1,8 @@
+{
+  "name": "DEX Marketing by Colakin",
+  "description": "Enterprise multi-tenant AI marketing operations SaaS platform uniting email marketing, MCP-first CRM integrations, lead intelligence, social media publishing, approvals, automation, and unified analytics.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
