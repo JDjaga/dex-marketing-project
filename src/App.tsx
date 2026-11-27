@@ -58,6 +58,13 @@ export default function App() {
     }
   }, [authContext, activeWorkspaceId]);
 
+  // Return from LinkedIn OAuth lands on /?linkedin=connected — jump to Social channels
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('linkedin')) {
+      setActiveSection('social');
+    }
+  }, []);
+
   const refreshAuth = useCallback(async () => {
     const res = await api.me();
     setAuthContext(res.context);
@@ -228,10 +235,20 @@ export default function App() {
       {activeSection === 'overview' && <OverviewView onNavigate={setActiveSection} />}
 
       {activeSection === 'campaigns' && (
-        <CampaignsAndEmailView workspaceId={activeWorkspaceId} initialMode="list" />
+        <CampaignsAndEmailView
+          workspaceId={activeWorkspaceId}
+          initialMode="list"
+          userName={authContext.user.name}
+          userEmail={authContext.user.email}
+        />
       )}
       {activeSection === 'email' && (
-        <CampaignsAndEmailView workspaceId={activeWorkspaceId} initialMode="wizard" />
+        <CampaignsAndEmailView
+          workspaceId={activeWorkspaceId}
+          initialMode="wizard"
+          userName={authContext.user.name}
+          userEmail={authContext.user.email}
+        />
       )}
 
       {activeSection === 'audience' && (

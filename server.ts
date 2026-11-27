@@ -10,6 +10,15 @@ import { aiFacade } from './src/server/providers/aiProvider.ts';
 import { emailProvider } from './src/server/providers/emailProvider.ts';
 import { handleMockMcpRpc, mcpCrmClient, type MCPJsonRpcRequest } from './src/server/providers/mcpCrmClient.ts';
 import {
+  buildLinkedInAuthorizeUrl,
+  consumeLinkedInOAuthState,
+  createLinkedInOAuthState,
+  exchangeLinkedInCode,
+  fetchLinkedInUserInfo,
+  getLinkedInRedirectUri,
+  isLinkedInConfigured,
+} from './src/server/providers/linkedinProvider.ts';
+import {
   buildAuthContext,
   listUserJwtSessions,
   loginWithPassword,
@@ -948,6 +957,102 @@ export function createApp() {
     res.json({ account: acc });
   });
 
+  // LinkedIn OAuth 2.0 connect flow (real API integration)
+  app.get('/api/social/linkedin/connect', requireAuth, requirePermission('integrations:manage'), (req: AuthedRequest, res) => {
+    if (!isLinkedInConfigured()) {
+      return res.status(503).json({
+        error: 'LinkedIn OAuth is not configured. Set LINKEDIN_CLIENT_ID and LINKEDIN_CLIENT_SECRET.',
+      });
+    }
+    const redirectUri = getLinkedInRedirectUri(getAppBaseUrl(req));
+    const state = createLinkedInOAuthState({
+      userId: req.auth!.user.id,
+      organizationId: req.auth!.organization.id,
+      workspaceId: String(req.query.workspaceId || req.auth!.workspaces[0]?.id || ''),
+    });
+    res.json({ authUrl: buildLinkedInAuthorizeUrl(state, redirectUri), redirectUri });
+  });
+
+  // Public OAuth callback — authenticated via unguessable single-use state param
+  app.get('/api/social/linkedin/callback', async (req, res) => {
+    const appBaseUrl = getAppBaseUrl(req);
+    const redirectWithStatus = (status: string, reason?: string) =>
+      res.redirect(`${appBaseUrl}/?linkedin=${status}${reason ? `&reason=${encodeURIComponent(reason)}` : ''}`);
+
+    const oauthError = req.query.error;
+    if (oauthError) {
+      return redirectWithStatus('error', String(oauthError));
+    }
+    const code = String(req.query.code || '');
+    const state = String(req.query.state || '');
+    const pending = consumeLinkedInOAuthState(state);
+    if (!pending || !code) {
+      return redirectWithStatus('error', 'invalid_state');
+    }
+
+    try {
+      const redirectUri = getLinkedInRedirectUri(appBaseUrl);
+      const tokens = await exchangeLinkedInCode(code, redirectUri);
+      const profile = await fetchLinkedInUserInfo(tokens.accessToken);
+      const nowIso = new Date().toISOString();
+      const expiresAt = new Date(Date.now() + tokens.expiresInSeconds * 1000).toISOString();
+
+      const existing = demoStore.state.socialAccounts.find(
+        (a) => a.organizationId === pending.organizationId && a.platform === 'linkedin' && a.status !== 'disconnected'
+      );
+      const account = existing || {
+        id: `soc-${crypto.randomUUID().slice(0, 8)}`,
+        organizationId: pending.organizationId,
+        workspaceId: pending.workspaceId,
+        platform: 'linkedin' as const,
+        displayName: '',
+        handle: '',
+        accountType: 'Personal Profile',
+        status: 'connected' as const,
+        scopes: ['openid', 'profile', 'email', 'w_member_social'],
+        capabilities: {
+          publishText: true,
+          publishImage: false,
+          publishVideo: false,
+          scheduleNative: true,
+          fetchAnalytics: false,
+          limitationNote: 'Live LinkedIn text publishing via OAuth. Image/video uploads not yet supported.',
+        },
+        connectedAt: nowIso,
+      };
+      account.displayName = profile.name;
+      account.handle = profile.email || `member-${profile.sub.slice(0, 8)}`;
+      account.status = 'connected';
+      account.accessToken = tokens.accessToken;
+      account.tokenType = tokens.tokenType;
+      account.externalAccountId = profile.sub;
+      account.externalEmail = profile.email;
+      account.tokenExpiresAt = expiresAt;
+      account.connectedAt = nowIso;
+      if (!existing) demoStore.state.socialAccounts.push(account);
+
+      const memberRole =
+        demoStore.state.members.find(
+          (m) => m.organizationId === pending.organizationId && m.userId === pending.userId
+        )?.role || 'Viewer';
+      recordAudit({
+        organizationId: pending.organizationId,
+        workspaceId: pending.workspaceId,
+        actorId: pending.userId,
+        actorName: profile.name,
+        actorRole: memberRole,
+        action: 'integration.linkedin_connected',
+        targetType: 'social_account',
+        targetId: account.id,
+        detail: `LinkedIn account "${profile.name}" connected via OAuth.`,
+      });
+
+      redirectWithStatus('connected');
+    } catch (err) {
+      redirectWithStatus('error', err instanceof Error ? err.message : 'oauth_failed');
+    }
+  });
+
   app.post('/api/social/posts', requireAuth, requirePermission('social:create'), (req: AuthedRequest, res) => {
     const orgId = req.auth!.organization.id;
     const title = String(req.body?.title || '').trim();
@@ -1003,9 +1108,9 @@ export function createApp() {
     res.json({ approval, post });
   });
 
-  app.post('/api/social/posts/:id/publish', requireAuth, requirePermission('social:create'), (req: AuthedRequest, res) => {
+  app.post('/api/social/posts/:id/publish', requireAuth, requirePermission('social:create'), async (req: AuthedRequest, res) => {
     try {
-      const post = publishSocialPost({
+      const post = await publishSocialPost({
         organizationId: req.auth!.organization.id,
         postId: String(req.params.id),
         actorId: req.auth!.user.id,

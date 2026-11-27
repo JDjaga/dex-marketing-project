@@ -63,6 +63,7 @@ export const SocialAndCalendarView: React.FC<SocialAndCalendarViewProps> = ({
   const [newAccPlatform, setNewAccPlatform] = useState<SocialPlatform>('linkedin');
   const [newAccName, setNewAccName] = useState('');
   const [newAccHandle, setNewAccHandle] = useState('');
+  const [liBusy, setLiBusy] = useState(false);
 
   // Asset Upload
   const [assetName, setAssetName] = useState('');
@@ -87,6 +88,37 @@ export const SocialAndCalendarView: React.FC<SocialAndCalendarViewProps> = ({
   useEffect(() => {
     loadAll();
   }, []);
+
+  // Surface LinkedIn OAuth callback result (?linkedin=connected|error)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const li = params.get('linkedin');
+    if (!li) return;
+    if (li === 'connected') {
+      setNotice('LinkedIn account connected via OAuth — real publishing is now enabled for LinkedIn posts.');
+      setTab('accounts');
+      loadAll();
+    } else {
+      setError(`LinkedIn connection failed: ${params.get('reason') || 'unknown error'}`);
+    }
+    params.delete('linkedin');
+    params.delete('reason');
+    const qs = params.toString();
+    window.history.replaceState({}, '', `${window.location.pathname}${qs ? `?${qs}` : ''}`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleLinkedInOAuth = async () => {
+    setLiBusy(true);
+    setError('');
+    try {
+      const res = await api.linkedinConnect(workspaceId);
+      window.location.href = res.authUrl;
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to start LinkedIn OAuth');
+      setLiBusy(false);
+    }
+  };
 
   const handleAiVariations = async () => {
     if (!baseIdea.trim()) return;
@@ -440,6 +472,24 @@ export const SocialAndCalendarView: React.FC<SocialAndCalendarViewProps> = ({
               </button>
             </div>
           </form>
+
+          <div className="bg-white border border-slate-200 rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+              <h3 className="text-base font-bold text-[#0A2472]">LinkedIn — Live OAuth Connection</h3>
+              <p className="text-xs text-slate-500 mt-1">
+                Connect your LinkedIn account to publish real posts through the LinkedIn API.
+                Posts go live publicly on your profile.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleLinkedInOAuth}
+              disabled={liBusy}
+              className="px-4 py-2.5 bg-[#0A66C2] text-white text-xs font-semibold rounded-lg cursor-pointer min-h-[42px] disabled:opacity-60 whitespace-nowrap"
+            >
+              {liBusy ? 'Redirecting to LinkedIn…' : 'Connect LinkedIn'}
+            </button>
+          </div>
 
           {accounts.length === 0 ? (
             <div className="bg-white border border-slate-200 rounded-xl p-8 text-center text-sm text-slate-500">

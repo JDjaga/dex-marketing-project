@@ -14,6 +14,7 @@ import type {
 } from '../../shared/types.ts';
 import { aiFacade } from '../providers/aiProvider.ts';
 import { emailProvider } from '../providers/emailProvider.ts';
+import { isLinkedInConfigured, publishLinkedInTextPost } from '../providers/linkedinProvider.ts';
 import { demoStore } from '../store/demoStore.ts';
 import { renderPersonalizedTemplate } from '../utils/security.ts';
 import { recordAudit } from './authService.ts';
@@ -826,7 +827,7 @@ export function decideApproval(params: {
   return approval;
 }
 
-export function publishSocialPost(params: {
+export async function publishSocialPost(params: {
   organizationId: string;
   postId: string;
   actorId: string;
@@ -844,10 +845,52 @@ export function publishSocialPost(params: {
   }
 
   const nowIso = new Date().toISOString();
-  post.status = 'published';
+  const publishOutcomes: Array<{ platform: string; mode: 'live' | 'simulated' | 'failed'; detail?: string }> = [];
+  let livePublishCount = 0;
+
+  // Live LinkedIn publishing when a connected OAuth account exists
+  if (post.platforms.includes('linkedin') && isLinkedInConfigured()) {
+    const linkedInAccount = demoStore.state.socialAccounts.find(
+      (a) =>
+        a.organizationId === params.organizationId &&
+        a.platform === 'linkedin' &&
+        a.status === 'connected' &&
+        Boolean(a.accessToken && a.externalAccountId)
+    );
+    if (linkedInAccount?.accessToken && linkedInAccount.externalAccountId) {
+      const variation = post.variations.linkedin;
+      const hashtags = (variation?.hashtags || []).map((h) => `#${h.replace(/^#/, '')}`).join(' ');
+      const commentary = [variation?.content || post.title, hashtags, variation?.cta || '', post.linkUrl || '']
+        .filter(Boolean)
+        .join('\n\n');
+      const result = await publishLinkedInTextPost({
+        accessToken: linkedInAccount.accessToken,
+        authorSub: linkedInAccount.externalAccountId,
+        commentary,
+      });
+      if (result.success) {
+        livePublishCount++;
+        publishOutcomes.push({ platform: 'linkedin', mode: 'live', detail: result.postUrn || 'published' });
+      } else {
+        publishOutcomes.push({ platform: 'linkedin', mode: 'failed', detail: result.error });
+        if (result.error?.includes('401') || result.error?.includes('403')) {
+          linkedInAccount.status = 'expired';
+          linkedInAccount.connectedAt = nowIso;
+        }
+      }
+    }
+  }
+
+  // Remaining platforms stay in transparent simulation until their providers ship
+  for (const platform of post.platforms) {
+    if (platform === 'linkedin' && publishOutcomes.some((o) => o.platform === 'linkedin')) continue;
+    publishOutcomes.push({ platform, mode: 'simulated' });
+  }
+
+  post.status = publishOutcomes.some((o) => o.mode === 'failed') && livePublishCount === 0 ? 'failed' : 'published';
   post.publishedAt = nowIso;
   post.updatedAt = nowIso;
-  post.isDemoSimulated = true;
+  post.isDemoSimulated = livePublishCount === 0;
   post.metricsAvailable = false;
   post.metrics = { reach: null, impressions: null, likes: null, comments: null, shares: null, clicks: null };
 
@@ -857,7 +900,7 @@ export function publishSocialPost(params: {
     type: 'publish_social_post',
     status: 'completed',
     idempotencyKey: `social-pub-${post.id}-${Date.now()}`,
-    payload: { postId: post.id, platforms: post.platforms },
+    payload: { postId: post.id, platforms: post.platforms, outcomes: publishOutcomes },
     attempts: 1,
     maxAttempts: 3,
     scheduledFor: nowIso,
@@ -871,10 +914,10 @@ export function publishSocialPost(params: {
     actorId: params.actorId,
     actorName: params.actorName,
     actorRole: params.actorRole,
-    action: 'social.published_simulated',
+    action: livePublishCount > 0 ? 'social.published' : 'social.published_simulated',
     targetType: 'social_post',
     targetId: post.id,
-    detail: `Simulated publishing "${post.title}" to ${post.platforms.join(', ')}.`,
+    detail: `Publishing "${post.title}" — ${publishOutcomes.map((o) => `${o.platform}:${o.mode}`).join(', ')}.`,
   });
 
   return post;

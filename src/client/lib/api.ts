@@ -312,6 +312,11 @@ export const api = {
   toggleSocialAccount: (id: string) =>
     apiRequest<{ account: SocialAccount }>(`/api/social/accounts/${id}/toggle`, { method: 'POST' }),
 
+  linkedinConnect: (workspaceId?: string) =>
+    apiRequest<{ authUrl: string; redirectUri: string }>(
+      `/api/social/linkedin/connect${workspaceId ? `?workspaceId=${encodeURIComponent(workspaceId)}` : ''}`
+    ),
+
   createSocialPost: (payload: Record<string, unknown>) =>
     apiRequest<{ post: SocialPost }>('/api/social/posts', {
       method: 'POST',

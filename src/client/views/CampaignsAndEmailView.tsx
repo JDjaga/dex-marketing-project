@@ -24,6 +24,8 @@ import { api } from '../lib/api.ts';
 interface CampaignsAndEmailViewProps {
   workspaceId: string;
   initialMode?: 'list' | 'wizard';
+  userName?: string;
+  userEmail?: string;
 }
 
 const CAMPAIGN_TYPES: Array<{ id: CampaignType; label: string }> = [
@@ -41,6 +43,8 @@ const CAMPAIGN_TYPES: Array<{ id: CampaignType; label: string }> = [
 export const CampaignsAndEmailView: React.FC<CampaignsAndEmailViewProps> = ({
   workspaceId,
   initialMode = 'list',
+  userName = '',
+  userEmail = '',
 }) => {
   const [campaigns, setCampaigns] = useState<Array<Campaign & { metrics: CampaignMetrics }>>([]);
   const [templates, setTemplates] = useState<EmailTemplate[]>([]);
@@ -71,9 +75,9 @@ export const CampaignsAndEmailView: React.FC<CampaignsAndEmailViewProps> = ({
     segmentId: '',
     subject: '',
     previewText: '',
-    senderName: '',
-    senderEmail: '',
-    replyTo: '',
+    senderName: userName,
+    senderEmail: userEmail,
+    replyTo: userEmail,
     htmlBody: '',
     textBody: '',
     trackOpens: true,

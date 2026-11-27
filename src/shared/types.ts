@@ -427,6 +427,10 @@ export interface SocialAccount {
     limitationNote?: string;
   };
   tokenExpiresAt?: string;
+  accessToken?: string;
+  tokenType?: string;
+  externalAccountId?: string;
+  externalEmail?: string;
   connectedAt: string;
 }
 
